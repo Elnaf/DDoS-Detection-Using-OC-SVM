@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 from datetime import timedelta
 import matplotlib.pyplot as plt
 
-# Column names based on your dataset
+# Column names
 column_names = [
     'destination_ip', 'source_ip', 'destination_port', 'source_port', 'protocol',
     'start_timestamp', 'ack_number', 'end_timestamp', 'packet_number',
@@ -12,10 +12,10 @@ column_names = [
 ]
 
 # Read the dataset
-file_path = 'DUMP.txt'  # Adjust this to the correct path of your dataset
+file_path = 'DUMP.txt'
 df = pd.read_csv(file_path, delim_whitespace=True, names=column_names)
 
-# Convert 'start_timestamp' to datetime and sort
+# Convertion of 'start_timestamp' to datetime and sort
 df['start_timestamp'] = pd.to_datetime(df['start_timestamp'], unit='s')
 df.sort_values('start_timestamp', inplace=True)
 
@@ -34,7 +34,7 @@ df['window'] = df['start_timestamp'].apply(lambda x: int((x - start_time) / time
 # Aggregating data by window
 windowed_data = features.groupby(df['window']).sum()
 
-# OC-SVM Model - Adjust the parameters based on your dataset characteristics
+# OC-SVM Model
 oc_svm_model = OneClassSVM(kernel='rbf', gamma='auto', nu=0.0026)
 oc_svm_model.fit(windowed_data)
 
@@ -50,7 +50,7 @@ anomaly_details = df[df['window'].isin(anomaly_indices)]
 # Filter for SYN packets and create a copy to avoid SettingWithCopyWarning
 syn_packets = df[df['syn'] == 1].copy()
 
-# Group data by window, destination_ip, and destination_port
+# Data Grouped by window, destination_ip, and destination_port
 grouped_syn_data = syn_packets.groupby(['window', 'destination_ip', 'destination_port']).size().reset_index(name='packet_count')
 
 # Sort and select top potential attacks
@@ -95,6 +95,4 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-# Optional: Save the results to a CSV file
-anomaly_details.to_csv('anomalies.csv', index=False)
-grouped_syn_data.to_csv('syn_packet_analysis.csv', index=False)
+
